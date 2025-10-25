@@ -1,4 +1,4 @@
-﻿using AdminControl.DAL; // Додаємо using
+﻿using AdminControl.DAL; 
 
 namespace AdminControl.DALEF.Concrete
 {
