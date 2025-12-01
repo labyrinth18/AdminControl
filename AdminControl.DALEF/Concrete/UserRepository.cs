@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography; // Додано для SHA256
+using System.Text;                  // Додано для Encoding
 using System.Threading.Tasks;
 
 namespace AdminControl.DALEF.Concrete
@@ -18,14 +20,40 @@ namespace AdminControl.DALEF.Concrete
             _context = context;
         }
 
+        public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
+        {
+            var usersFromDb = await _context.Users
+                .Include(user => user.Role)
+                .ToListAsync();
+
+            var usersDto = usersFromDb.Select(user => new UserDto
+            {
+                UserID = user.UserID,
+                Login = user.Login,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                RoleName = user.Role.RoleName
+            }).ToList();
+
+            return usersDto;
+        }
+
+        // --- ТУТ ЗМІНЕНО ХЕШУВАННЯ ---
         public async Task<UserDto> AddUserAsync(UserCreateDto newUserDto)
         {
-            var passwordHash = newUserDto.Password.GetHashCode().ToString();
+            // Використовуємо SHA256 для стабільного хешування
+            string passwordHash;
+            using (var sha256 = SHA256.Create())
+            {
+                var bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(newUserDto.Password));
+                passwordHash = BitConverter.ToString(bytes).Replace("-", "").ToLower();
+            }
 
             var newUser = new User
             {
                 Login = newUserDto.Login,
-                PasswordHash = passwordHash,
+                PasswordHash = passwordHash, // Зберігаємо стабільний хеш
                 FirstName = newUserDto.FirstName,
                 LastName = newUserDto.LastName,
                 Email = newUserDto.Email,
@@ -53,25 +81,6 @@ namespace AdminControl.DALEF.Concrete
             };
         }
 
-        public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
-        {
-            var usersFromDb = await _context.Users
-                .Include(user => user.Role)
-                .ToListAsync();
-
-            var usersDto = usersFromDb.Select(user => new UserDto
-            {
-                UserID = user.UserID,
-                Login = user.Login,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Email = user.Email,
-                RoleName = user.Role.RoleName
-            }).ToList();
-
-            return usersDto;
-        }
-
         public async Task UpdateUserAsync(UserUpdateDto userToUpdateDto)
         {
             var userFromDb = await _context.Users.FindAsync(userToUpdateDto.UserID);
@@ -97,6 +106,25 @@ namespace AdminControl.DALEF.Concrete
                 _context.Users.Remove(userToDelete);
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public async Task<UserDto?> AuthenticateUserAsync(string login, string passwordHash)
+        {
+            var user = await _context.Users
+                .Include(u => u.Role)
+                .FirstOrDefaultAsync(u => u.Login == login && u.PasswordHash == passwordHash);
+
+            if (user == null) return null;
+
+            return new UserDto
+            {
+                UserID = user.UserID,
+                Login = user.Login,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                RoleName = user.Role.RoleName
+            };
         }
     }
 }

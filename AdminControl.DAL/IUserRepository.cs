@@ -7,11 +7,10 @@ namespace AdminControl.DAL
     public interface IUserRepository
     {
         Task<IEnumerable<UserDto>> GetAllUsersAsync();
-
         Task<UserDto> AddUserAsync(UserCreateDto newUser);
-
         Task UpdateUserAsync(UserUpdateDto userToUpdate);
-
         Task DeleteUserAsync(int userId);
+
+        Task<UserDto?> AuthenticateUserAsync(string login, string passwordHash);
     }
 }

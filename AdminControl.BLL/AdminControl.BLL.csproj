@@ -7,14 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="App.xaml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ApplicationDefinition Include="App.xaml" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <ProjectReference Include="..\AdminControl.DAL\AdminControl.DAL.csproj" />
     <ProjectReference Include="..\AdminControl.DTO\AdminControl.DTO.csproj" />
   </ItemGroup>
 

@@ -11,10 +11,10 @@ namespace AdminControl.DALEF.Models
 
         [Required]
         [MaxLength(50)]
-        public string Login { get; set; }
+        public string Login { get; set; } = string.Empty;
 
         [Required]
-        public string PasswordHash { get; set; }
+        public string PasswordHash { get; set; } = string.Empty;
 
         [MaxLength(100)]
         public string FirstName { get; set; } = string.Empty;
@@ -47,6 +47,6 @@ namespace AdminControl.DALEF.Models
 
 
         [ForeignKey("RoleID")]
-        public virtual Role Role { get; set; }
+        public virtual Role? Role { get; set; }
     }
 }

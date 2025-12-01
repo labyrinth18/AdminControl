@@ -14,6 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AdminControl.BLL\AdminControl.BLL.csproj" />
     <ProjectReference Include="..\AdminControl.DALEF\AdminControl.DALEF.csproj" />
     <ProjectReference Include="..\AdminControl.DAL\AdminControl.DAL.csproj" />
     <ProjectReference Include="..\AdminControl.DTO\AdminControl.DTO.csproj" />
