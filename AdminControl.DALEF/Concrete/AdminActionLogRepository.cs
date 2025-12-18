@@ -121,7 +121,6 @@ namespace AdminControl.DALEF.Concrete
             _context.AdminActionLogs.Add(log);
             await _context.SaveChangesAsync();
 
-            // Завантажуємо зв'язані дані
             await _context.Entry(log).Reference(l => l.AdminUser).LoadAsync();
             await _context.Entry(log).Reference(l => l.TargetUser).LoadAsync();
             await _context.Entry(log).Reference(l => l.ActionType).LoadAsync();

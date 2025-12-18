@@ -12,7 +12,6 @@ namespace AdminControl.DAL
         Task DeleteUserAsync(int userId);
         Task<UserDto?> AuthenticateUserAsync(string login, string passwordHash);
         
-        // Методи для валідації унікальності
         Task<bool> IsLoginExistsAsync(string login);
         Task<bool> IsEmailExistsAsync(string email, int? excludeUserId = null);
     }

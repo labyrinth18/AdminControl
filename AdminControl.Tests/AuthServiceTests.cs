@@ -25,10 +25,8 @@ namespace AdminControl.Tests
         {
             var options = CreateNewDbOptions();
 
-            // Arrange - створюємо тестові дані
             using (var context = new AdminControlContext(options))
             {
-                // Використовуємо той самий алгоритм хешування, що і в AuthService
                 string passwordHash;
                 using (var sha256 = SHA256.Create())
                 {
@@ -58,7 +56,6 @@ namespace AdminControl.Tests
                 context.SaveChanges();
             }
 
-            // Act - виконуємо тест
             using (var context = new AdminControlContext(options))
             {
                 var repository = new UserRepository(context);
@@ -66,7 +63,6 @@ namespace AdminControl.Tests
 
                 var result = await authService.AuthenticateAsync("test_user", "mypassword");
 
-                // Assert - перевіряємо результат
                 Assert.IsNotNull(result);
                 Assert.AreEqual("test_user", result.Login);
                 Assert.AreEqual("Admin", result.RoleName);
@@ -79,7 +75,6 @@ namespace AdminControl.Tests
         {
             var options = CreateNewDbOptions();
 
-            // Arrange
             using (var context = new AdminControlContext(options))
             {
                 string passwordHash;
@@ -111,7 +106,6 @@ namespace AdminControl.Tests
                 context.SaveChanges();
             }
 
-            // Act - очікується виняток
             using (var context = new AdminControlContext(options))
             {
                 var repository = new UserRepository(context);

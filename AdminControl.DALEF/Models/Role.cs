@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AdminControl.DALEF.Models
 {
-    [Table("Roles")] // Явно вказуємо назву таблицi
+    [Table("Roles")] 
     public class Role
     {
         [Key]

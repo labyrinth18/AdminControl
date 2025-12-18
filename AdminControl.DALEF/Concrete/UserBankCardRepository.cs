@@ -22,12 +22,12 @@ namespace AdminControl.DALEF.Concrete
         {
             return await _context.UserBankCards
                 .Where(c => c.UserID == userId)
-                // ПЕРЕВІРТЕ ЦЕЙ БЛОК SELECT - ВІН КРИТИЧНО ВАЖЛИВИЙ
+
                 .Select(c => new UserBankCardDto
                 {
                     BankCardID = c.BankCardID,
                     CardHolderName = c.CardHolderName,
-                    CardNumberSuffix = c.CardNumberSuffix, // <--- Переконайтеся, що цей рядок є!
+                    CardNumberSuffix = c.CardNumberSuffix, 
                     ExpiryDate = c.ExpiryDate,
                     UserID = c.UserID
                 })

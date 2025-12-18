@@ -9,7 +9,6 @@
         Background="#ECF0F1">
 
     <Window.Resources>
-        <!-- Стиль для TextBox з відображенням помилок валідації (Material Design style) -->
         <Style x:Key="ValidationTextBoxStyle" TargetType="TextBox">
             <Setter Property="Padding" Value="10,8"/>
             <Setter Property="FontSize" Value="14"/>
@@ -29,7 +28,6 @@
                                               VerticalAlignment="Center"
                                               Margin="{TemplateBinding Padding}"/>
                             </Border>
-                            <!-- Текст помилки під полем (Material Design Error Message) -->
                             <TextBlock x:Name="ErrorMessage"
                                        Text="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource TemplatedParent}}"
                                        Foreground="#E74C3C"
@@ -58,7 +56,6 @@
             </Setter>
         </Style>
 
-        <!-- Стиль для PasswordBox з Material Design look -->
         <Style x:Key="ValidationPasswordBoxStyle" TargetType="PasswordBox">
             <Setter Property="Padding" Value="10,8"/>
             <Setter Property="FontSize" Value="14"/>
@@ -82,13 +79,12 @@
         <Grid Margin="30">
             <StackPanel VerticalAlignment="Center">
 
-                <!-- Іконка -->
+                <!-- іконка -->
                 <TextBlock Text="🔐" 
                            FontSize="48" 
                            HorizontalAlignment="Center"
                            Margin="0,0,0,10"/>
 
-                <!-- Заголовок -->
                 <TextBlock Text="Admin Control" 
                            FontSize="28" FontWeight="Bold" 
                            Foreground="#2C3E50"
@@ -100,21 +96,21 @@
                            HorizontalAlignment="Center" 
                            Margin="0,5,0,30"/>
 
-                <!-- Поле логіну з IDataErrorInfo валідацією -->
+                <!--поле логіну  -->
                 <TextBlock Text="Логін" Foreground="#7F8C8D" FontSize="12" Margin="0,0,0,5"/>
                 <TextBox Style="{StaticResource ValidationTextBoxStyle}"
                          Text="{Binding Login, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" 
                          Height="40" 
                          Margin="0,0,0,15"/>
 
-                <!-- Поле паролю -->
+                <!-- поле паролю -->
                 <TextBlock Text="Пароль" Foreground="#7F8C8D" FontSize="12" Margin="0,0,0,5"/>
                 <PasswordBox x:Name="pbPassword" 
                              Style="{StaticResource ValidationPasswordBoxStyle}"
                              Height="40" 
                              Margin="0,0,0,5"/>
 
-                <!-- Повідомлення про помилку паролю -->
+                <!-- повідомлення про помилку паролю -->
                 <TextBlock Text="{Binding ErrorMessage}" 
                            Foreground="#E74C3C" 
                            TextWrapping="Wrap" 
@@ -123,7 +119,7 @@
                            FontSize="11"
                            Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}"/>
 
-                <!-- Кнопка входу з командою -->
+                <!-- кнопка входу з командою -->
                 <Button Content="Увійти" 
                         Command="{Binding LoginCommand}" 
                         CommandParameter="{Binding ElementName=pbPassword}"
@@ -156,7 +152,7 @@
 
             </StackPanel>
 
-            <!-- Індикатор завантаження -->
+            <!-- індикатор завантаження -->
             <Grid Background="#CCFFFFFF" 
                   Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">

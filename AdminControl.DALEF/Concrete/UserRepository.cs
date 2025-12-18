@@ -44,7 +44,6 @@ namespace AdminControl.DALEF.Concrete
 
         public async Task<UserDto> AddUserAsync(UserCreateDto newUserDto)
         {
-            // Хешування паролю SHA256
             string passwordHash;
             using (var sha256 = SHA256.Create())
             {

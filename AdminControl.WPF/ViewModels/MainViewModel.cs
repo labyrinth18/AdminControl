@@ -23,7 +23,6 @@ namespace AdminControl.WPF.ViewModels
         private bool _isAdmin;
         private bool _isManager;
 
-        // Команди
         public ICommand DeleteUserCommand { get; }
         public ICommand ReloadCommand { get; }
         public ICommand AddUserCommand { get; }
@@ -33,7 +32,6 @@ namespace AdminControl.WPF.ViewModels
         public ICommand ShowRolesCommand { get; }
         public ICommand ShowLogsCommand { get; }
         
-        // Команди для ролей
         public ICommand AddRoleCommand { get; }
         public ICommand EditRoleCommand { get; }
         public ICommand DeleteRoleCommand { get; }
@@ -43,7 +41,6 @@ namespace AdminControl.WPF.ViewModels
         public ObservableCollection<RoleDto> Roles { get; set; }
         public ObservableCollection<AdminActionLogDto> ActionLogs { get; set; }
 
-        // Вибраний користувач
         public UserDto? SelectedUser
         {
             get => _selectedUser;
@@ -55,7 +52,6 @@ namespace AdminControl.WPF.ViewModels
             }
         }
 
-        // Вибрана роль
         public RoleDto? SelectedRole
         {
             get => _selectedRole;
@@ -67,7 +63,6 @@ namespace AdminControl.WPF.ViewModels
             }
         }
 
-        // Поточний авторизований користувач
         public UserDto? CurrentUser
         {
             get => _currentUser;
@@ -80,12 +75,10 @@ namespace AdminControl.WPF.ViewModels
             }
         }
 
-        // Інформація про поточного користувача для відображення
         public string CurrentUserInfo => CurrentUser != null 
             ? $"{CurrentUser.FullName} ({CurrentUser.RoleName})" 
             : "Не авторизовано";
 
-        // Поточне представлення (Users, Roles, Logs)
         public string CurrentView
         {
             get => _currentView;
@@ -97,7 +90,6 @@ namespace AdminControl.WPF.ViewModels
                 OnPropertyChanged(nameof(IsRolesView));
                 OnPropertyChanged(nameof(IsLogsView));
                 
-                // Завантажуємо логи при переході на вкладку
                 if (value == "Logs")
                 {
                     LoadLogs();
@@ -105,7 +97,6 @@ namespace AdminControl.WPF.ViewModels
             }
         }
 
-        // Властивості для видимості секцій
         public bool IsUsersView => CurrentView == "Users";
         public bool IsRolesView => CurrentView == "Roles";
         public bool IsLogsView => CurrentView == "Logs";
@@ -123,10 +114,8 @@ namespace AdminControl.WPF.ViewModels
             set { _isManager = value; OnPropertyChanged(); }
         }
 
-        // Чи може користувач редагувати (Admin або Manager)
         public bool CanEdit => IsAdmin || IsManager;
         
-        // Чи може користувач видаляти (тільки Admin)
         public bool CanDelete => IsAdmin;
 
         public MainViewModel(
@@ -144,7 +133,6 @@ namespace AdminControl.WPF.ViewModels
             Roles = new ObservableCollection<RoleDto>();
             ActionLogs = new ObservableCollection<AdminActionLogDto>();
 
-            // Ініціалізація команд
             DeleteUserCommand = new RelayCommand(ExecuteDeleteUser, CanDeleteUser);
             ReloadCommand = new RelayCommand(_ => LoadData());
             AddUserCommand = new RelayCommand(ExecuteAddUser, _ => CanEdit);
@@ -154,7 +142,6 @@ namespace AdminControl.WPF.ViewModels
             ShowRolesCommand = new RelayCommand(_ => { CurrentView = "Roles"; LoadRolesAsync(); });
             ShowLogsCommand = new RelayCommand(_ => CurrentView = "Logs");
             
-            // Команди для ролей
             AddRoleCommand = new RelayCommand(ExecuteAddRole, _ => IsAdmin);
             EditRoleCommand = new RelayCommand(ExecuteEditRole, _ => SelectedRole != null && IsAdmin);
             DeleteRoleCommand = new RelayCommand(ExecuteDeleteRole, _ => SelectedRole != null && IsAdmin);
@@ -162,7 +149,6 @@ namespace AdminControl.WPF.ViewModels
             LoadData();
         }
 
-        // Ініціалізація з інформацією про поточного користувача
         public void Initialize(UserDto user)
         {
             CurrentUser = user;
@@ -189,7 +175,6 @@ namespace AdminControl.WPF.ViewModels
         {
             try
             {
-                // Завантаження користувачів
                 var users = await _userRepository.GetAllUsersAsync();
                 Users.Clear();
                 foreach (var user in users)
@@ -197,7 +182,6 @@ namespace AdminControl.WPF.ViewModels
                     Users.Add(user);
                 }
 
-                // Завантаження ролей
                 await LoadRolesAsync();
             }
             catch (Exception ex)
@@ -243,7 +227,6 @@ namespace AdminControl.WPF.ViewModels
             }
         }
 
-        // --- ЛОГІКА ВИДАЛЕННЯ КОРИСТУВАЧА ---
         private bool CanDeleteUser(object? parameter)
         {
             return SelectedUser != null && CanDelete;
@@ -253,7 +236,6 @@ namespace AdminControl.WPF.ViewModels
         {
             if (SelectedUser == null) return;
 
-            // Перевірка: не можна видалити самого себе
             if (CurrentUser != null && SelectedUser.UserID == CurrentUser.UserID)
             {
                 MessageBox.Show("Ви не можете видалити власний обліковий запис!",
@@ -286,7 +268,6 @@ namespace AdminControl.WPF.ViewModels
             }
         }
 
-        // --- ЛОГІКА ДОДАВАННЯ КОРИСТУВАЧА ---
         private void ExecuteAddUser(object? parameter)
         {
             var addUserWindow = (AddEditUserWindow)_serviceProvider.GetService(typeof(AddEditUserWindow))!;
@@ -294,11 +275,10 @@ namespace AdminControl.WPF.ViewModels
             
             if (addUserWindow.ShowDialog() == true)
             {
-                LoadData(); // Оновлюємо список після додавання
+                LoadData(); 
             }
         }
 
-        // --- ЛОГІКА РЕДАГУВАННЯ КОРИСТУВАЧА ---
         private bool CanEditUser(object? parameter)
         {
             return SelectedUser != null && CanEdit;
@@ -313,11 +293,10 @@ namespace AdminControl.WPF.ViewModels
             
             if (editUserWindow.ShowDialog() == true)
             {
-                LoadData(); // Оновлюємо список після редагування
+                LoadData(); 
             }
         }
 
-        // --- ЛОГІКА УПРАВЛІННЯ РОЛЯМИ ---
         private async void ExecuteAddRole(object? parameter)
         {
             var dialog = new InputDialog("Додавання ролі", "Введіть назву нової ролі:");
@@ -353,7 +332,7 @@ namespace AdminControl.WPF.ViewModels
                     };
                     await _roleRepository.UpdateRoleAsync(updateDto);
                     await LoadRolesAsync();
-                    LoadData(); // Оновлюємо користувачів (бо назва ролі змінилась)
+                    LoadData();
                     MessageBox.Show("Роль успішно оновлено!", "Успіх", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 catch (Exception ex)
@@ -367,7 +346,6 @@ namespace AdminControl.WPF.ViewModels
         {
             if (SelectedRole == null) return;
 
-            // Перевірка чи роль не використовується
             var result = MessageBox.Show(
                 $"Ви впевнені, що хочете видалити роль '{SelectedRole.RoleName}'?\n\nУвага: якщо роль використовується користувачами, видалення не вдасться.",
                 "Підтвердження видалення",
@@ -391,7 +369,6 @@ namespace AdminControl.WPF.ViewModels
             }
         }
 
-        // --- ЛОГІКА ВИХОДУ ---
         private void ExecuteLogout(object? parameter)
         {
             var result = MessageBox.Show(
@@ -402,11 +379,9 @@ namespace AdminControl.WPF.ViewModels
 
             if (result == MessageBoxResult.Yes)
             {
-                // Отримуємо вікно входу через DI
                 var loginWindow = (LoginWindow)_serviceProvider.GetService(typeof(LoginWindow))!;
                 loginWindow.Show();
 
-                // Закриваємо поточне вікно
                 foreach (Window window in Application.Current.Windows)
                 {
                     if (window is Views.MainWindow)

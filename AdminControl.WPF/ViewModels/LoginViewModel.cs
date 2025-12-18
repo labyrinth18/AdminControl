@@ -27,7 +27,6 @@ namespace AdminControl.WPF.ViewModels
             LoginCommand = new RelayCommand(ExecuteLogin, CanExecuteLogin);
         }
 
-        // Властивості з валідацією
         public string Login
         {
             get => _login;
@@ -36,7 +35,6 @@ namespace AdminControl.WPF.ViewModels
                 _login = value;
                 OnPropertyChanged();
 
-                // ВАЛІДАЦІЯ
                 ClearErrors();
                 if (string.IsNullOrWhiteSpace(_login))
                 {
@@ -72,7 +70,6 @@ namespace AdminControl.WPF.ViewModels
         {
             if (parameter is not PasswordBox passwordBox) return;
 
-            // Валідація паролю
             if (string.IsNullOrWhiteSpace(passwordBox.Password))
             {
                 ErrorMessage = "Пароль не може бути порожнім";
@@ -92,7 +89,6 @@ namespace AdminControl.WPF.ViewModels
             {
                 var user = await _authService.AuthenticateAsync(Login, passwordBox.Password);
 
-                // Перевірка ролі: тільки Admin та Manager мають доступ
                 if (user.RoleName?.ToLower() != "admin" && user.RoleName?.ToLower() != "manager")
                 {
                     MessageBox.Show(
@@ -105,7 +101,6 @@ namespace AdminControl.WPF.ViewModels
                     return;
                 }
 
-                // Успішний вхід - відкриваємо головне вікно
                 OpenMainWindow(user);
                 RequestClose?.Invoke();
             }
@@ -127,7 +122,6 @@ namespace AdminControl.WPF.ViewModels
         {
             var mainWindow = (MainWindow)_serviceProvider.GetService(typeof(Views.MainWindow))!;
 
-            // Передаємо інформацію про користувача в MainViewModel
             if (mainWindow.DataContext is MainViewModel mainVm)
             {
                 mainVm.Initialize(user);

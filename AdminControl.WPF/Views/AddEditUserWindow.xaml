@@ -56,7 +56,7 @@
                              Height="35"/>
                 </StackPanel>
 
-                <!-- Пароль (тільки для створення) -->
+                <!-- Пароль  -->
                 <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,10,10"
                             Visibility="{Binding PasswordVisibility}">
                     <TextBlock Text="Пароль: *" Foreground="#7F8C8D" Margin="0,0,0,3"/>
@@ -99,7 +99,7 @@
                               Height="35"/>
                 </StackPanel>
 
-                <!-- Адреса (на всю ширину) -->
+                <!-- Адреса  -->
                 <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,10">
                     <TextBlock Text="Адреса:" Foreground="#7F8C8D" Margin="0,0,0,3"/>
                     <TextBox Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}" 

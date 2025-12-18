@@ -15,7 +15,6 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- Бокова панель меню -->
         <Border Grid.Column="0" Background="#2C3E50">
             <Grid>
                 <Grid.RowDefinitions>
@@ -24,7 +23,7 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <!-- Логотип та назва -->
+
                 <StackPanel Grid.Row="0" Margin="15,20,15,30">
                     <TextBlock Text="🛡️ AdminPanel" 
                                Foreground="White" 
@@ -37,7 +36,7 @@
                                Margin="0,8,0,0"/>
                 </StackPanel>
 
-                <!-- Навігаційне меню -->
+
                 <StackPanel Grid.Row="1">
                     <Button Content="👥 Користувачі" 
                             Style="{StaticResource MenuButtonStyle}"
@@ -63,10 +62,8 @@
             </Grid>
         </Border>
 
-        <!-- Основний контент -->
         <Grid Grid.Column="1" Background="#ECF0F1" Margin="15">
             
-            <!-- Секція користувачів -->
             <Grid Visibility="{Binding IsUsersView, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -74,7 +71,6 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <!-- Заголовок -->
                 <StackPanel Grid.Row="0" Margin="0,0,0,15">
                     <TextBlock Text="Управління користувачами" 
                                FontSize="26" 

@@ -29,15 +29,12 @@ namespace AdminControl.WPF.ViewModels
         private bool _isActive = true;
         private string _errorMessage = string.Empty;
 
-        // Команди
         public ICommand SaveCommand { get; }
         public ICommand CancelCommand { get; }
 
-        // Колекції
         public ObservableCollection<RoleDto> Roles { get; set; }
         public ObservableCollection<string> Genders { get; set; }
 
-        // Властивості вікна
         public string WindowTitle => _isEditMode ? "Редагування користувача" : "Додавання користувача";
         public string SaveButtonText => _isEditMode ? "Зберегти" : "Додати";
         public Visibility PasswordVisibility => _isEditMode ? Visibility.Collapsed : Visibility.Visible;
@@ -175,7 +172,6 @@ namespace AdminControl.WPF.ViewModels
             Roles = new ObservableCollection<RoleDto>();
             Genders = new ObservableCollection<string> { "Чоловік", "Жінка", "Інше" };
 
-            // Кнопка завжди активна - валідація при натисканні
             SaveCommand = new RelayCommand(ExecuteSave);
             CancelCommand = new RelayCommand(ExecuteCancel);
 
@@ -199,7 +195,6 @@ namespace AdminControl.WPF.ViewModels
                 SelectedGender = userToEdit.Gender ?? string.Empty;
                 IsActive = userToEdit.IsActive;
 
-                // Знаходимо відповідну роль
                 foreach (var role in Roles)
                 {
                     if (role.RoleID == userToEdit.RoleID)
@@ -211,7 +206,6 @@ namespace AdminControl.WPF.ViewModels
             }
             else
             {
-                // Скидаємо всі поля для режиму додавання
                 _userId = 0;
                 Login = string.Empty;
                 Password = string.Empty;
@@ -327,7 +321,6 @@ namespace AdminControl.WPF.ViewModels
 
         private async void ExecuteSave(object? parameter)
         {
-            // Валідація
             var error = ValidateAndGetError();
             if (error != null)
             {
@@ -337,7 +330,6 @@ namespace AdminControl.WPF.ViewModels
 
             try
             {
-                // Перевірка унікальності логіну (тільки для нових користувачів)
                 if (!_isEditMode)
                 {
                     var loginExists = await _userRepository.IsLoginExistsAsync(Login);
@@ -348,7 +340,6 @@ namespace AdminControl.WPF.ViewModels
                     }
                 }
 
-                // Перевірка унікальності email
                 var emailExists = await _userRepository.IsEmailExistsAsync(Email, _isEditMode ? _userId : null);
                 if (emailExists)
                 {
@@ -358,7 +349,6 @@ namespace AdminControl.WPF.ViewModels
 
                 if (_isEditMode)
                 {
-                    // Оновлення користувача
                     var updateDto = new UserUpdateDto
                     {
                         UserID = _userId,
@@ -378,7 +368,6 @@ namespace AdminControl.WPF.ViewModels
                 }
                 else
                 {
-                    // Додавання нового користувача
                     var createDto = new UserCreateDto
                     {
                         Login = Login,
@@ -398,7 +387,6 @@ namespace AdminControl.WPF.ViewModels
                         MessageBoxButton.OK, MessageBoxImage.Information);
                 }
 
-                // Закриваємо вікно з успішним результатом
                 if (parameter is Window window)
                 {
                     window.DialogResult = true;
