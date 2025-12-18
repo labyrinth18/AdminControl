@@ -1,0 +1,278 @@
+<Window x:Class="AdminControl.WPF.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:AdminControl.WPF.ViewModels"
+        mc:Ignorable="d"
+        Title="Admin Control Panel" Height="650" Width="1100"
+        WindowStartupLocation="CenterScreen"
+        MinHeight="500" MinWidth="800">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Бокова панель меню -->
+        <Border Grid.Column="0" Background="#2C3E50">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Логотип та назва -->
+                <StackPanel Grid.Row="0" Margin="15,20,15,30">
+                    <TextBlock Text="🛡️ AdminPanel" 
+                               Foreground="White" 
+                               FontSize="22" 
+                               FontWeight="Bold"/>
+                    <TextBlock Text="{Binding CurrentUserInfo}" 
+                               Foreground="#BDC3C7" 
+                               FontSize="11" 
+                               TextWrapping="Wrap"
+                               Margin="0,8,0,0"/>
+                </StackPanel>
+
+                <!-- Навігаційне меню -->
+                <StackPanel Grid.Row="1">
+                    <Button Content="👥 Користувачі" 
+                            Style="{StaticResource MenuButtonStyle}"
+                            Command="{Binding ShowUsersCommand}"/>
+                    <Button Content="🔐 Ролі" 
+                            Style="{StaticResource MenuButtonStyle}"
+                            Command="{Binding ShowRolesCommand}"
+                            IsEnabled="{Binding IsAdmin}"/>
+                    <Button Content="📋 Логи дій" 
+                            Style="{StaticResource MenuButtonStyle}"
+                            Command="{Binding ShowLogsCommand}"
+                            IsEnabled="{Binding IsAdmin}"/>
+                </StackPanel>
+
+                <!-- Кнопка виходу -->
+                <StackPanel Grid.Row="2" Margin="0,0,0,20">
+                    <Separator Background="#7F8C8D" Margin="10,0,10,15"/>
+                    <Button Content="🚪 Вийти" 
+                            Style="{StaticResource MenuButtonStyle}" 
+                            Background="#C0392B"
+                            Command="{Binding LogoutCommand}"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Основний контент -->
+        <Grid Grid.Column="1" Background="#ECF0F1" Margin="15">
+            
+            <!-- Секція користувачів -->
+            <Grid Visibility="{Binding IsUsersView, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Заголовок -->
+                <StackPanel Grid.Row="0" Margin="0,0,0,15">
+                    <TextBlock Text="Управління користувачами" 
+                               FontSize="26" 
+                               FontWeight="SemiBold" 
+                               Foreground="#2C3E50"/>
+                    <TextBlock Text="Перегляд, додавання та редагування користувачів системи" 
+                               Foreground="#7F8C8D" 
+                               FontSize="13"
+                               Margin="0,5,0,0"/>
+                </StackPanel>
+
+                <!-- Таблиця користувачів -->
+                <DataGrid Grid.Row="1"
+                          ItemsSource="{Binding Users}"
+                          SelectedItem="{Binding SelectedUser}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          CanUserAddRows="False"
+                          SelectionMode="Single"
+                          Style="{StaticResource DataGridStyle}"
+                          HeadersVisibility="Column">
+
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="ID" 
+                                            Binding="{Binding UserID}" 
+                                            Width="50"/>
+                        <DataGridTextColumn Header="Логін" 
+                                            Binding="{Binding Login}" 
+                                            Width="120" 
+                                            FontWeight="Bold"/>
+                        <DataGridTextColumn Header="Повне ім'я" 
+                                            Binding="{Binding FullName}" 
+                                            Width="*"/>
+                        <DataGridTextColumn Header="Email" 
+                                            Binding="{Binding Email}" 
+                                            Width="180"/>
+                        <DataGridTextColumn Header="Роль" 
+                                            Binding="{Binding RoleName}" 
+                                            Width="100"/>
+                        <DataGridCheckBoxColumn Header="Активний" 
+                                                Binding="{Binding IsActive}" 
+                                                Width="80"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!-- Панель дій -->
+                <Border Grid.Row="2" 
+                        Background="White" 
+                        CornerRadius="5" 
+                        Padding="10" 
+                        Margin="0,15,0,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Інформація про вибраного користувача -->
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="Вибрано: " Foreground="#7F8C8D"/>
+                            <TextBlock Text="{Binding SelectedUser.FullName, FallbackValue='Нікого не вибрано'}" 
+                                       FontWeight="Bold" 
+                                       Foreground="#2C3E50"/>
+                        </StackPanel>
+
+                        <!-- Кнопки дій -->
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Button Content="🔄 Оновити" 
+                                    Command="{Binding ReloadCommand}"
+                                    Width="100"/>
+                            <Button Content="➕ Додати" 
+                                    Command="{Binding AddUserCommand}"
+                                    Style="{StaticResource AddButtonStyle}"
+                                    Width="100"
+                                    IsEnabled="{Binding CanEdit}"/>
+                            <Button Content="✏️ Редагувати" 
+                                    Command="{Binding EditUserCommand}"
+                                    Width="110"
+                                    IsEnabled="{Binding CanEdit}"/>
+                            <Button Content="🗑️ Видалити" 
+                                    Command="{Binding DeleteUserCommand}"
+                                    Style="{StaticResource DeleteButtonStyle}"
+                                    Width="100"
+                                    IsEnabled="{Binding CanDelete}"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- Секція ролей -->
+            <Grid Visibility="{Binding IsRolesView, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Заголовок -->
+                <StackPanel Grid.Row="0" Margin="0,0,0,15">
+                    <TextBlock Text="🔐 Управління ролями" 
+                               FontSize="26" 
+                               FontWeight="SemiBold" 
+                               Foreground="#2C3E50"/>
+                    <TextBlock Text="Створення, редагування та видалення ролей користувачів" 
+                               Foreground="#7F8C8D" 
+                               FontSize="13"
+                               Margin="0,5,0,0"/>
+                </StackPanel>
+                
+                <!-- Список ролей -->
+                <DataGrid Grid.Row="1"
+                          ItemsSource="{Binding Roles}"
+                          SelectedItem="{Binding SelectedRole}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          CanUserAddRows="False"
+                          SelectionMode="Single"
+                          Style="{StaticResource DataGridStyle}"
+                          HeadersVisibility="Column">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="ID" Binding="{Binding RoleID}" Width="80"/>
+                        <DataGridTextColumn Header="Назва ролі" Binding="{Binding RoleName}" Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!-- Панель дій для ролей -->
+                <Border Grid.Row="2" 
+                        Background="White" 
+                        CornerRadius="5" 
+                        Padding="10" 
+                        Margin="0,15,0,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="Вибрано: " Foreground="#7F8C8D"/>
+                            <TextBlock Text="{Binding SelectedRole.RoleName, FallbackValue='Нічого не вибрано'}" 
+                                       FontWeight="Bold" 
+                                       Foreground="#2C3E50"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Button Content="➕ Додати" 
+                                    Command="{Binding AddRoleCommand}"
+                                    Style="{StaticResource AddButtonStyle}"
+                                    Width="100"/>
+                            <Button Content="✏️ Редагувати" 
+                                    Command="{Binding EditRoleCommand}"
+                                    Width="110"/>
+                            <Button Content="🗑️ Видалити" 
+                                    Command="{Binding DeleteRoleCommand}"
+                                    Style="{StaticResource DeleteButtonStyle}"
+                                    Width="100"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- Секція логів -->
+            <Grid Visibility="{Binding IsLogsView, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Заголовок -->
+                <StackPanel Grid.Row="0" Margin="0,0,0,15">
+                    <TextBlock Text="📋 Журнал дій" 
+                               FontSize="26" 
+                               FontWeight="SemiBold" 
+                               Foreground="#2C3E50"/>
+                    <TextBlock Text="Перегляд історії дій адміністраторів" 
+                               Foreground="#7F8C8D" 
+                               FontSize="13"
+                               Margin="0,5,0,0"/>
+                </StackPanel>
+
+                <!-- Таблиця логів -->
+                <DataGrid Grid.Row="1"
+                          ItemsSource="{Binding ActionLogs}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          CanUserAddRows="False"
+                          Style="{StaticResource DataGridStyle}"
+                          HeadersVisibility="Column">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="ID" Binding="{Binding LogID}" Width="50"/>
+                        <DataGridTextColumn Header="Дата" Binding="{Binding CreatedAt, StringFormat={}{0:dd.MM.yyyy HH:mm}}" Width="130"/>
+                        <DataGridTextColumn Header="Адміністратор" Binding="{Binding AdminUserName}" Width="150"/>
+                        <DataGridTextColumn Header="Дія" Binding="{Binding ActionDescription}" Width="200"/>
+                        <DataGridTextColumn Header="Ціль" Binding="{Binding TargetUserName}" Width="150"/>
+                        <DataGridTextColumn Header="Причина" Binding="{Binding Reason}" Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

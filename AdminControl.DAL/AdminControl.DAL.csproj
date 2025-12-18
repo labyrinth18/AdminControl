@@ -1,21 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="App.xaml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ApplicationDefinition Include="App.xaml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\AdminControl.DTO\AdminControl.DTO.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\AdminControl.DTO\AdminControl.DTO.csproj" />
+	</ItemGroup>
 
 </Project>

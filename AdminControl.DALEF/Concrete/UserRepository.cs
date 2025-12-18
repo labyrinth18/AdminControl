@@ -1,12 +1,12 @@
-﻿using AdminControl.DAL;
+using AdminControl.DAL;
 using AdminControl.DALEF.Models;
 using AdminControl.DTO;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography; // Додано для SHA256
-using System.Text;                  // Додано для Encoding
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace AdminControl.DALEF.Concrete
@@ -26,23 +26,25 @@ namespace AdminControl.DALEF.Concrete
                 .Include(user => user.Role)
                 .ToListAsync();
 
-            var usersDto = usersFromDb.Select(user => new UserDto
+            return usersFromDb.Select(user => new UserDto
             {
                 UserID = user.UserID,
                 Login = user.Login,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
+                FirstName = user.FirstName ?? string.Empty,
+                LastName = user.LastName ?? string.Empty,
                 Email = user.Email,
-                RoleName = user.Role.RoleName
+                PhoneNumber = user.PhoneNumber,
+                Address = user.Address,
+                Gender = user.Gender,
+                RoleID = user.RoleID,
+                RoleName = user.Role?.RoleName ?? "Немає ролі",
+                IsActive = user.IsActive
             }).ToList();
-
-            return usersDto;
         }
 
-        // --- ТУТ ЗМІНЕНО ХЕШУВАННЯ ---
         public async Task<UserDto> AddUserAsync(UserCreateDto newUserDto)
         {
-            // Використовуємо SHA256 для стабільного хешування
+            // Хешування паролю SHA256
             string passwordHash;
             using (var sha256 = SHA256.Create())
             {
@@ -53,12 +55,15 @@ namespace AdminControl.DALEF.Concrete
             var newUser = new User
             {
                 Login = newUserDto.Login,
-                PasswordHash = passwordHash, // Зберігаємо стабільний хеш
+                PasswordHash = passwordHash,
                 FirstName = newUserDto.FirstName,
                 LastName = newUserDto.LastName,
                 Email = newUserDto.Email,
+                PhoneNumber = newUserDto.PhoneNumber,
+                Address = newUserDto.Address,
+                Gender = newUserDto.Gender,
                 RoleID = newUserDto.RoleID,
-                IsActive = true,
+                IsActive = newUserDto.IsActive,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -74,10 +79,15 @@ namespace AdminControl.DALEF.Concrete
             {
                 UserID = createdUser.UserID,
                 Login = createdUser.Login,
-                FirstName = createdUser.FirstName,
-                LastName = createdUser.LastName,
+                FirstName = createdUser.FirstName ?? string.Empty,
+                LastName = createdUser.LastName ?? string.Empty,
                 Email = createdUser.Email,
-                RoleName = createdUser.Role.RoleName
+                PhoneNumber = createdUser.PhoneNumber,
+                Address = createdUser.Address,
+                Gender = createdUser.Gender,
+                RoleID = createdUser.RoleID,
+                RoleName = createdUser.Role?.RoleName ?? string.Empty,
+                IsActive = createdUser.IsActive
             };
         }
 
@@ -90,7 +100,11 @@ namespace AdminControl.DALEF.Concrete
                 userFromDb.FirstName = userToUpdateDto.FirstName;
                 userFromDb.LastName = userToUpdateDto.LastName;
                 userFromDb.Email = userToUpdateDto.Email;
+                userFromDb.PhoneNumber = userToUpdateDto.PhoneNumber;
+                userFromDb.Address = userToUpdateDto.Address;
+                userFromDb.Gender = userToUpdateDto.Gender;
                 userFromDb.RoleID = userToUpdateDto.RoleID;
+                userFromDb.IsActive = userToUpdateDto.IsActive;
                 userFromDb.UpdatedAt = DateTime.UtcNow;
 
                 await _context.SaveChangesAsync();
@@ -120,11 +134,30 @@ namespace AdminControl.DALEF.Concrete
             {
                 UserID = user.UserID,
                 Login = user.Login,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
+                FirstName = user.FirstName ?? string.Empty,
+                LastName = user.LastName ?? string.Empty,
                 Email = user.Email,
-                RoleName = user.Role.RoleName
+                PhoneNumber = user.PhoneNumber,
+                Address = user.Address,
+                Gender = user.Gender,
+                RoleID = user.RoleID,
+                RoleName = user.Role?.RoleName ?? string.Empty,
+                IsActive = user.IsActive
             };
+        }
+
+        public async Task<bool> IsLoginExistsAsync(string login)
+        {
+            return await _context.Users.AnyAsync(u => u.Login == login);
+        }
+
+        public async Task<bool> IsEmailExistsAsync(string email, int? excludeUserId = null)
+        {
+            if (excludeUserId.HasValue)
+            {
+                return await _context.Users.AnyAsync(u => u.Email == email && u.UserID != excludeUserId.Value);
+            }
+            return await _context.Users.AnyAsync(u => u.Email == email);
         }
     }
 }

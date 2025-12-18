@@ -4,6 +4,8 @@ using AdminControl.DALEF.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace AdminControl.Tests
@@ -23,53 +25,23 @@ namespace AdminControl.Tests
         {
             var options = CreateNewDbOptions();
 
+            // Arrange - створюємо тестові дані
             using (var context = new AdminControlContext(options))
             {
-                var passwordHash = "mypassword".GetHashCode().ToString();
-
-ї                var role = new Role { RoleName = "Admin" };
-
-                context.Users.Add(new User
+                // Використовуємо той самий алгоритм хешування, що і в AuthService
+                string passwordHash;
+                using (var sha256 = SHA256.Create())
                 {
-                    Login = "test_user",
-                    PasswordHash = passwordHash,
-                    Role = role,
-                    Email = "test@mail.com", 
-                    FirstName = "Test",
-                    LastName = "User",
+                    var bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes("mypassword"));
+                    passwordHash = BitConverter.ToString(bytes).Replace("-", "").ToLower();
+                }
+
+                var role = new Role
+                {
+                    RoleName = "Admin",
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
-                });
-                context.SaveChanges();
-            }
-
-
-            using (var context = new AdminControlContext(options))
-            {
-
-                var repository = new UserRepository(context);
-                var authService = new AuthService(repository);
-
-                
-                var result = await authService.AuthenticateAsync("test_user", "mypassword");
-
-                
-                Assert.IsNotNull(result);
-                Assert.AreEqual("test_user", result.Login);
-                Assert.AreEqual("Admin", result.RoleName);
-            }
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(Exception))] 
-        public async Task AuthenticateAsync_WrongPassword_ThrowsException()
-        {
-            
-            var options = CreateNewDbOptions();
-            using (var context = new AdminControlContext(options))
-            {
-                var passwordHash = "correct_password".GetHashCode().ToString();
-                var role = new Role { RoleName = "User" };
+                };
 
                 context.Users.Add(new User
                 {
@@ -79,22 +51,74 @@ namespace AdminControl.Tests
                     Email = "test@mail.com",
                     FirstName = "Test",
                     LastName = "User",
+                    IsActive = true,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 });
                 context.SaveChanges();
             }
 
-            
+            // Act - виконуємо тест
             using (var context = new AdminControlContext(options))
             {
                 var repository = new UserRepository(context);
                 var authService = new AuthService(repository);
 
+                var result = await authService.AuthenticateAsync("test_user", "mypassword");
+
+                // Assert - перевіряємо результат
+                Assert.IsNotNull(result);
+                Assert.AreEqual("test_user", result.Login);
+                Assert.AreEqual("Admin", result.RoleName);
+            }
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(Exception))]
+        public async Task AuthenticateAsync_WrongPassword_ThrowsException()
+        {
+            var options = CreateNewDbOptions();
+
+            // Arrange
+            using (var context = new AdminControlContext(options))
+            {
+                string passwordHash;
+                using (var sha256 = SHA256.Create())
+                {
+                    var bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes("correct_password"));
+                    passwordHash = BitConverter.ToString(bytes).Replace("-", "").ToLower();
+                }
+
+                var role = new Role
+                {
+                    RoleName = "User",
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                context.Users.Add(new User
+                {
+                    Login = "test_user",
+                    PasswordHash = passwordHash,
+                    Role = role,
+                    Email = "test@mail.com",
+                    FirstName = "Test",
+                    LastName = "User",
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                });
+                context.SaveChanges();
+            }
+
+            // Act - очікується виняток
+            using (var context = new AdminControlContext(options))
+            {
+                var repository = new UserRepository(context);
+                var authService = new AuthService(repository);
 
                 await authService.AuthenticateAsync("test_user", "WRONG_PASSWORD");
             }
-            
         }
 
         [TestMethod]

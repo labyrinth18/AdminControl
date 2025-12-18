@@ -1,5 +1,3 @@
-﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -7,9 +5,13 @@ using System.Runtime.CompilerServices;
 
 namespace AdminControl.WPF.Infrastructure
 {
-    public class ViewModelBase : INotifyPropertyChanged, INotifyDataErrorInfo
+    /// <summary>
+    /// Базовий клас для всіх ViewModel з підтримкою INotifyPropertyChanged та IDataErrorInfo
+    /// </summary>
+    public class ViewModelBase : INotifyPropertyChanged, IDataErrorInfo
     {
-       
+        #region INotifyPropertyChanged
+
         public event PropertyChangedEventHandler? PropertyChanged;
 
         protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
@@ -17,43 +19,68 @@ namespace AdminControl.WPF.Infrastructure
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        private readonly Dictionary<string, List<string>> _errors = new();
+        #endregion
 
-        public bool HasErrors => _errors.Any();
+        #region IDataErrorInfo
 
-        
-        public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
+        // Словник для зберігання помилок валідації
+        private readonly Dictionary<string, string> _errors = new();
 
-        public IEnumerable GetErrors(string? propertyName)
+        /// <summary>
+        /// Загальна помилка об'єкта (не використовується, але потрібна для інтерфейсу)
+        /// </summary>
+        public string Error => string.Empty;
+
+        /// <summary>
+        /// Індексатор для отримання помилки по імені властивості
+        /// </summary>
+        public string this[string columnName]
         {
-            if (string.IsNullOrEmpty(propertyName)) return null;
-            return _errors.ContainsKey(propertyName) ? _errors[propertyName] : null;
-        }
-
-        protected void AddError(string error, [CallerMemberName] string propertyName = "")
-        {
-            if (!_errors.ContainsKey(propertyName))
-                _errors[propertyName] = new List<string>();
-
-            if (!_errors[propertyName].Contains(error))
+            get
             {
-                _errors[propertyName].Add(error);
-                OnErrorsChanged(propertyName);
+                if (_errors.ContainsKey(columnName))
+                    return _errors[columnName];
+                return string.Empty;
             }
         }
 
+        /// <summary>
+        /// Чи є помилки валідації
+        /// </summary>
+        public bool HasErrors => _errors.Any();
+
+        /// <summary>
+        /// Додати помилку валідації для властивості
+        /// </summary>
+        protected void AddError(string error, [CallerMemberName] string propertyName = "")
+        {
+            if (!string.IsNullOrEmpty(propertyName))
+            {
+                _errors[propertyName] = error;
+                OnPropertyChanged(propertyName);
+            }
+        }
+
+        /// <summary>
+        /// Очистити помилку валідації для властивості
+        /// </summary>
         protected void ClearErrors([CallerMemberName] string propertyName = "")
         {
             if (_errors.ContainsKey(propertyName))
             {
                 _errors.Remove(propertyName);
-                OnErrorsChanged(propertyName);
+                OnPropertyChanged(propertyName);
             }
         }
 
-        private void OnErrorsChanged(string propertyName)
+        /// <summary>
+        /// Очистити всі помилки валідації
+        /// </summary>
+        protected void ClearAllErrors()
         {
-            ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
+            _errors.Clear();
         }
+
+        #endregion
     }
 }
