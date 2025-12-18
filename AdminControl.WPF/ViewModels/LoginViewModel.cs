@@ -35,14 +35,15 @@ namespace AdminControl.WPF.ViewModels
                 _login = value;
                 OnPropertyChanged();
 
-                ClearErrors();
+                ClearErrors(nameof(Login));
+
                 if (string.IsNullOrWhiteSpace(_login))
                 {
-                    AddError("Логін не може бути порожнім");
+                    AddError("Логін не може бути порожнім", nameof(Login));
                 }
                 else if (_login.Length < 3)
                 {
-                    AddError("Логін занадто короткий (мінімум 3 символи)");
+                    AddError("Логін занадто короткий", nameof(Login));
                 }
             }
         }

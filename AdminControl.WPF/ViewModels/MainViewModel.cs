@@ -100,8 +100,7 @@ namespace AdminControl.WPF.ViewModels
         public bool IsUsersView => CurrentView == "Users";
         public bool IsRolesView => CurrentView == "Roles";
         public bool IsLogsView => CurrentView == "Logs";
-
-        // Права доступу
+        
         public bool IsAdmin
         {
             get => _isAdmin;

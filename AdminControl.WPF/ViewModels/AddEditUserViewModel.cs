@@ -41,7 +41,6 @@ namespace AdminControl.WPF.ViewModels
         public bool IsLoginEditable => !_isEditMode;
 
         #region Properties
-
         public string Login
         {
             get => _login;
@@ -49,6 +48,14 @@ namespace AdminControl.WPF.ViewModels
             {
                 _login = value;
                 OnPropertyChanged();
+
+                ClearErrors(nameof(Login));
+                if (string.IsNullOrWhiteSpace(_login))
+                    AddError("Логін не може бути порожнім", nameof(Login));
+                else if (_login.Length < 3)
+                    AddError("Логін має бути мінімум 3 символи", nameof(Login));
+                else if (!System.Text.RegularExpressions.Regex.IsMatch(_login, @"^[a-zA-Z0-9_]+$"))
+                    AddError("Тільки латиниця, цифри та _", nameof(Login));
             }
         }
 
@@ -59,6 +66,24 @@ namespace AdminControl.WPF.ViewModels
             {
                 _password = value;
                 OnPropertyChanged();
+
+                if (!_isEditMode) 
+                {
+                    ClearErrors(nameof(Password));
+                    if (string.IsNullOrWhiteSpace(_password))
+                        AddError("Пароль обов'язковий", nameof(Password));
+                    else if (_password.Length < 6)
+                        AddError("Мінімум 6 символів", nameof(Password));
+
+                    
+                    if (!string.IsNullOrEmpty(ConfirmPassword))
+                    {
+                        if (_password != ConfirmPassword)
+                            AddError("Паролі не співпадають", nameof(ConfirmPassword));
+                        else
+                            ClearErrors(nameof(ConfirmPassword)); 
+                    }
+                }
             }
         }
 
@@ -69,9 +94,17 @@ namespace AdminControl.WPF.ViewModels
             {
                 _confirmPassword = value;
                 OnPropertyChanged();
+
+                if (!_isEditMode)
+                {
+                    ClearErrors(nameof(ConfirmPassword));
+                    if (string.IsNullOrWhiteSpace(_confirmPassword))
+                        AddError("Підтвердіть пароль", nameof(ConfirmPassword));
+                    else if (_password != _confirmPassword)
+                        AddError("Паролі не співпадають", nameof(ConfirmPassword));
+                }
             }
         }
-
         public string FirstName
         {
             get => _firstName;
@@ -79,6 +112,13 @@ namespace AdminControl.WPF.ViewModels
             {
                 _firstName = value;
                 OnPropertyChanged();
+
+            
+                ClearErrors(nameof(FirstName));
+                if (string.IsNullOrWhiteSpace(_firstName))
+                    AddError("Ім'я не може бути порожнім", nameof(FirstName));
+                else if (_firstName.Length < 2)
+                    AddError("Ім'я повинно містити мінімум 2 символи", nameof(FirstName));
             }
         }
 
@@ -89,6 +129,13 @@ namespace AdminControl.WPF.ViewModels
             {
                 _lastName = value;
                 OnPropertyChanged();
+
+            
+                ClearErrors(nameof(LastName));
+                if (string.IsNullOrWhiteSpace(_lastName))
+                    AddError("Прізвище не може бути порожнім", nameof(LastName));
+                else if (_lastName.Length < 2)
+                    AddError("Прізвище повинно містити мінімум 2 символи", nameof(LastName));
             }
         }
 
@@ -99,6 +146,13 @@ namespace AdminControl.WPF.ViewModels
             {
                 _email = value;
                 OnPropertyChanged();
+
+             
+                ClearErrors(nameof(Email));
+                if (string.IsNullOrWhiteSpace(_email))
+                    AddError("Email не може бути порожнім", nameof(Email));
+                else if (!Regex.IsMatch(_email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+                    AddError("Невірний формат email", nameof(Email));
             }
         }
 
@@ -109,9 +163,15 @@ namespace AdminControl.WPF.ViewModels
             {
                 _phoneNumber = value;
                 OnPropertyChanged();
+
+                ClearErrors(nameof(PhoneNumber));
+           
+                if (!string.IsNullOrWhiteSpace(_phoneNumber) && !Regex.IsMatch(_phoneNumber, @"^[\+]?[0-9\s\-\(\)]+$"))
+                {
+                    AddError("Невірний формат телефону", nameof(PhoneNumber));
+                }
             }
         }
-
         public string Address
         {
             get => _address;
@@ -119,6 +179,7 @@ namespace AdminControl.WPF.ViewModels
             {
                 _address = value;
                 OnPropertyChanged();
+                ClearErrors(nameof(Address)); 
             }
         }
 
@@ -129,9 +190,9 @@ namespace AdminControl.WPF.ViewModels
             {
                 _selectedGender = value;
                 OnPropertyChanged();
+                ClearErrors(nameof(SelectedGender));
             }
         }
-
         public RoleDto? SelectedRole
         {
             get => _selectedRole;
@@ -139,6 +200,12 @@ namespace AdminControl.WPF.ViewModels
             {
                 _selectedRole = value;
                 OnPropertyChanged();
+
+                ClearErrors(nameof(SelectedRole));
+                if (_selectedRole == null)
+                {
+                    AddError("Оберіть роль", nameof(SelectedRole));
+                }
             }
         }
 
@@ -187,22 +254,8 @@ namespace AdminControl.WPF.ViewModels
             {
                 _userId = userToEdit.UserID;
                 Login = userToEdit.Login;
-                FirstName = userToEdit.FirstName;
-                LastName = userToEdit.LastName;
-                Email = userToEdit.Email;
-                PhoneNumber = userToEdit.PhoneNumber ?? string.Empty;
-                Address = userToEdit.Address ?? string.Empty;
-                SelectedGender = userToEdit.Gender ?? string.Empty;
-                IsActive = userToEdit.IsActive;
 
-                foreach (var role in Roles)
-                {
-                    if (role.RoleID == userToEdit.RoleID)
-                    {
-                        SelectedRole = role;
-                        break;
-                    }
-                }
+                ClearAllErrors();
             }
             else
             {
@@ -218,6 +271,8 @@ namespace AdminControl.WPF.ViewModels
                 SelectedGender = string.Empty;
                 IsActive = true;
                 SelectedRole = Roles.Count > 0 ? Roles[0] : null;
+
+                ClearAllErrors(); 
             }
 
             OnPropertyChanged(nameof(WindowTitle));
@@ -265,7 +320,6 @@ namespace AdminControl.WPF.ViewModels
             if (!Regex.IsMatch(Login, @"^[a-zA-Z0-9_]+$"))
                 return "Логін може містити лише латинські літери, цифри та _";
 
-            // Валідація паролю (тільки для нових користувачів)
             if (!_isEditMode)
             {
                 if (string.IsNullOrWhiteSpace(Password))
@@ -285,36 +339,31 @@ namespace AdminControl.WPF.ViewModels
                     return "Паролі не співпадають";
             }
 
-            // Валідація імені
             if (string.IsNullOrWhiteSpace(FirstName))
                 return "Ім'я не може бути порожнім";
             if (FirstName.Length < 2)
                 return "Ім'я повинно містити мінімум 2 символи";
 
-            // Валідація прізвища
             if (string.IsNullOrWhiteSpace(LastName))
                 return "Прізвище не може бути порожнім";
             if (LastName.Length < 2)
                 return "Прізвище повинно містити мінімум 2 символи";
 
-            // Валідація email
             if (string.IsNullOrWhiteSpace(Email))
                 return "Email не може бути порожнім";
             if (!Regex.IsMatch(Email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
                 return "Невірний формат email";
 
-            // Валідація телефону (якщо вказано)
             if (!string.IsNullOrWhiteSpace(PhoneNumber))
             {
                 if (!Regex.IsMatch(PhoneNumber, @"^[\+]?[0-9\s\-\(\)]+$"))
                     return "Невірний формат номера телефону";
             }
 
-            // Валідація ролі
             if (SelectedRole == null)
                 return "Будь ласка, виберіть роль";
 
-            return null; // Немає помилок
+            return null; 
         }
 
         #endregion
