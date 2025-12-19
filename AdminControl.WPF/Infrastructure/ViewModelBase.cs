@@ -27,7 +27,7 @@ namespace AdminControl.WPF.Infrastructure
         private readonly Dictionary<string, string> _errors = new();
 
         /// <summary>
-        /// Загальна помилка об'єкта (не використовується, але потрібна для інтерфейсу)
+        /// Загальна помилка об'єкта
         /// </summary>
         public string Error => string.Empty;
 

@@ -1,14 +1,11 @@
-using AdminControl.DTO;
+﻿//using AdminControl.DALEF.Models;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace AdminControl.DAL
 {
     public interface IAdminActionLogRepository
     {
-        Task<IEnumerable<AdminActionLogDto>> GetAllLogsAsync();
-        Task<IEnumerable<AdminActionLogDto>> GetLogsByAdminIdAsync(int adminUserId);
-        Task<IEnumerable<AdminActionLogDto>> GetLogsByTargetUserIdAsync(int targetUserId);
-        Task<AdminActionLogDto> AddLogAsync(AdminActionLogCreateDto logDto);
+        //void Add(AdminActionLog log); // Метод додати запис
+        //IEnumerable<AdminActionLog> GetAll(); // Метод отримати всі записи (щоб показати в таблиці)
     }
 }

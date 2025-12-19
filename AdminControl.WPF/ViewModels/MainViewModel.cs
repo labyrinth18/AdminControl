@@ -90,10 +90,10 @@ namespace AdminControl.WPF.ViewModels
                 OnPropertyChanged(nameof(IsRolesView));
                 OnPropertyChanged(nameof(IsLogsView));
                 
-                if (value == "Logs")
-                {
-                    LoadLogs();
-                }
+                //if (value == "Logs")
+                //{
+                //    LoadLogs();
+                //}
             }
         }
 
@@ -208,23 +208,23 @@ namespace AdminControl.WPF.ViewModels
             }
         }
 
-        private async void LoadLogs()
-        {
-            try
-            {
-                var logs = await _actionLogRepository.GetAllLogsAsync();
-                ActionLogs.Clear();
-                foreach (var log in logs)
-                {
-                    ActionLogs.Add(log);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Помилка завантаження логів: " + ex.Message, 
-                    "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
+        //private async void LoadLogs()
+        //{
+        //    try
+        //    {
+        //        //var logs = await _actionLogRepository.GetAllLogsAsync();
+        //        ActionLogs.Clear();
+        //        foreach (var log in logs)
+        //        {
+        //            ActionLogs.Add(log);
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show("Помилка завантаження логів: " + ex.Message, 
+        //            "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+        //    }
+        //}
 
         private bool CanDeleteUser(object? parameter)
         {
